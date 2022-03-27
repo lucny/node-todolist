@@ -4,6 +4,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 /* Připojení externího modulu moment (https://momentjs.com/) - knihovna pro formátování datových a časových údajů */
 const moment = require("moment");
+/* Připojení externího modulu csvtojson (https://www.npmjs.com/package/csvtojson) - knihovna usnadňující načtení dat z CSV do formátu JSON */
+const csvtojson = require('csvtojson');
 /* Připojení vestavěných  modulů fs (práce se soubory) a path (cesty v adresářové struktuře) */
 const fs = require("fs");
 const path = require("path");
@@ -15,6 +17,10 @@ const port = 3000;
 
 /* Identifikace složky obsahující statické soubory klientské části webu */
 app.use(express.static("public"));
+/* Nastavení typu šablonovacího engine na pug*/
+app.set("view engine", "pug");
+/* Nastavení složky, kde budou umístěny šablony pug */
+app.set("views", path.join(__dirname, "views"));
 
 /* Využití modulu body-parser pro parsování těla požadavku */
 const urlencodedParser = bodyParser.urlencoded({extended: false});
@@ -41,6 +47,26 @@ app.post('/savedata', urlencodedParser, (req, res) => {
     });
     /* Přesměrování na úvodní stránku serverové aplikace včetně odeslání stavové zprávy 301. */
     res.redirect(301, '/');
+});
+
+/* Reakce na požadavek odeslaný metodou get na adresu <server>/todolist */
+app.get("/todolist", (req, res) => {
+    /* Použití knihovny csvtojson k načtení dat ze souboru ukoly.csv. 
+       Atribut headers zjednodušuje pojmenování jednotlivých datových sloupců. */
+    /* Pro zpracování je použito tzv. promises, které pracují s částí .then (úspěšný průběh operace) a .catch (zachycení možných chyb) */   
+    csvtojson({headers:['ukol','predmet','zadani','odevzdani']}).fromFile(path.join(__dirname, 'data/ukoly.csv'))
+    .then(data => {
+        /* Vypsání získaných dat ve formátu JSON do konzole */
+        console.log(data);
+        /* Vykreslení šablony index.pug i s předanými daty (objekt v druhém parametru) */
+        res.render('index', {nadpis: "Seznam úkolů", ukoly: data});
+    })
+    .catch(err => {
+        /* Vypsání případné chyby do konzole */
+        console.log(err);
+        /* Vykreslení šablony error.pug s předanými údaji o chybě */
+        res.render('error', {nadpis: "Chyba v aplikaci", chyba: err});
+    });    
 });
 
 /* Spuštění webového serveru */

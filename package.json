@@ -25,7 +25,9 @@
   },
   "homepage": "https://github.com/lucny/node-todolist#readme",
   "dependencies": {
+    "csvtojson": "^2.0.10",
     "express": "^4.17.3",
-    "moment": "^2.29.1"
+    "moment": "^2.29.1",
+    "pug": "^3.0.2"
   }
 }

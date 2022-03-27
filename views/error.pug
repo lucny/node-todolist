@@ -1,0 +1,20 @@
+doctype html
+html
+    head
+        title Chybová stránka
+        link(rel='stylesheet' href='https://getbootstrap.com/docs/4.4/dist/css/bootstrap.min.css')
+    body
+        header.jumbotron-fluid.bg-danger.p-3
+            h1.text-center.text-white #{nadpis}
+
+        main.container
+            .alert.alert-danger #{chyba}
+                
+        footer.bg-dark.p-2
+            .container.text-white
+                p.float-right
+                    a(href="/") Zpět na formulář
+                p &copy; 2022 - IT2 - NodeJS
+        
+        script(src='https://code.jquery.com/jquery-3.4.1.slim.min.js')
+        script(src='https://getbootstrap.com/docs/4.4/dist/js/bootstrap.bundle.min.js')
