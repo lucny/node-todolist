@@ -1,5 +1,12 @@
-/* Připojení modulu frameworku Express */
+/* Připojení modulu frameworku Express (https://expressjs.com/) */
 const express = require("express");
+/* Připojení externího modulu body-parser (https://www.npmjs.com/package/body-parser) - middleware pro parsování těla požadavku */
+const bodyParser = require("body-parser");
+/* Připojení externího modulu moment (https://momentjs.com/) - knihovna pro formátování datových a časových údajů */
+const moment = require("moment");
+/* Připojení vestavěných  modulů fs (práce se soubory) a path (cesty v adresářové struktuře) */
+const fs = require("fs");
+const path = require("path");
 
 /* Vytvoření základního objektu serverové aplikace */
 const app = express();
@@ -8,6 +15,33 @@ const port = 3000;
 
 /* Identifikace složky obsahující statické soubory klientské části webu */
 app.use(express.static("public"));
+
+/* Využití modulu body-parser pro parsování těla požadavku */
+const urlencodedParser = bodyParser.urlencoded({extended: false});
+/* Ošetření požadavku poslaného metodou POST na adresu <server>/savedata
+   Ukládá data poslaná z webového formuláře do souboru CSV */
+app.post('/savedata', urlencodedParser, (req, res) => {
+    /* Do proměnné date bude pomocí knihovny MomentJS uloženo aktuální datum v podobě YYYY-MM-DD (rok-měsíc-den) */
+    let date = moment().format('YYYY-MM-DD');
+    /* Vytvoření řetězce z dat odeslaných z formuláře v těle požadavku (req.body) a obsahu proměnné date.
+       Data jsou obalena uvozovkami a oddělená čárkou. Escape sekvence \n provede ukončení řádku. */
+    let str = `"${req.body.ukol}","${req.body.predmet}","${date}","${req.body.odevzdani}"\n`;
+    /* Pomocí modulu fs a metody appendFile dojde k přidání připraveného řádku (proměnná str) do uvedeného souboru */
+    fs.appendFile(path.join(__dirname, 'data/ukoly.csv'), str, function (err) {
+        /* Když byla zaznamenána chyba při práci se souborem */
+        if (err) {
+            /* Vypsání chyby do konzole NodeJS (na serveru). */
+            console.error(err);
+            /* Odpovědí serveru bude stavová zpráva 400 a v hlavičce odpovědi budou odeslány upřesňující informace. */
+            return res.status(400).json({
+                success: false,
+                message: "Nastala chyba během ukládání souboru"
+            });
+        }
+    });
+    /* Přesměrování na úvodní stránku serverové aplikace včetně odeslání stavové zprávy 301. */
+    res.redirect(301, '/');
+});
 
 /* Spuštění webového serveru */
 app.listen(port, () => {
