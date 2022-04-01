@@ -58,6 +58,12 @@ app.get("/todolist", (req, res) => {
     .then(data => {
         /* Vypsání získaných dat ve formátu JSON do konzole */
         console.log(data);
+        /* Možnost seřazení dat podle sloupce odevzdani - vzestupně */
+        data.sort(function(a, b) { 
+            if (a.odevzdani > b.odevzdani) return 1
+            else if (a.odevzdani < b.odevzdani) return -1
+            else return 0; 
+        })
         /* Vykreslení šablony index.pug i s předanými daty (objekt v druhém parametru) */
         res.render('index', {nadpis: "Seznam úkolů", ukoly: data});
     })
